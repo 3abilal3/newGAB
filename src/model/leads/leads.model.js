@@ -1,12 +1,11 @@
-const {StaffSchema} = require("./Staff.schema");
+const StaffSchema = require("./Staff.schema");
 const customerSchema = require("./customer.Schema");
 const LeadCategorySchema = require("./category.Schema");
 const { LeadsSchema } = require("./leads.schema");
 
 
 
-
-
+//inset staff
 const insertStaff = staffObj =>{
 
     return new Promise((resolve,reject)=>{
@@ -30,7 +29,44 @@ const insertStaff = staffObj =>{
    
 }
 
+//get staff
+const getStaff = () => {
+    return new Promise((resolve, reject) => {
+      try {
+        StaffSchema
+        .find({}, 'staffId staffName mobileNo email', (error, staff) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(staff);
+          }
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+};
 
+// Function to generate a unique staff ID
+function generateStaffId() {
+    const prefix = 'S'; // Prefix for staff ID
+    const randomNumber = Math.floor(100 + Math.random() * 900); // Generate a 3-digit random number
+    return `${prefix}${randomNumber}`;
+  }
+
+function generateLeadId() {
+    const prefix = 'S'; // Prefix for staff ID
+    const randomNumber = Math.floor(100 + Math.random() * 900); // Generate a 3-digit random number
+    return `${prefix}${randomNumber}`;
+  }
+
+
+  function generateLeadMId() {
+    const prefix = 'S'; // Prefix for staff ID
+    const randomNumber = Math.floor(100 + Math.random() * 900); // Generate a 3-digit random number
+    return `${prefix}${randomNumber}`;
+  }
+//inset categories
 const insertCat = catOBJ =>{
 
     return new Promise((resolve,reject)=>{
@@ -54,7 +90,20 @@ const insertCat = catOBJ =>{
    
 }
 
+const getCust = async (userId, fields) => {
+    try {
+      // Your database query logic here to fetch the specified fields for the given userId
+      // Modify the code according to your specific database implementation
+      const result = await customerSchema.find({ clientId: userId }).select(fields.join(' '));
+  
+      return result;
+    } catch (error) {
+      throw new Error("Unable to retrieve customer information");
+    }
+  };
+  
 
+//inset customer
 const insertCust = custObj =>{
 
     return new Promise((resolve,reject)=>{
@@ -78,6 +127,8 @@ const insertCust = custObj =>{
    
 }
 
+
+
 // Function to generate the leads report
 function generateLeadsReport(leads) {
     // Perform necessary calculations and formatting to generate the report
@@ -95,6 +146,7 @@ function generateLeadsReport(leads) {
     return report;
   }
 
+//inset leads
 const insertLeads = leadsObj =>{
 
     return new Promise((resolve,reject)=>{
@@ -118,6 +170,7 @@ const insertLeads = leadsObj =>{
    
 }
 
+//inset user leads
 const insertUserLeads = leadsUserObj =>{
 
     return new Promise((resolve,reject)=>{
@@ -141,6 +194,7 @@ const insertUserLeads = leadsUserObj =>{
    
 }
 
+//get Leads
 const getLeads = clientId =>{
 
     return new Promise((resolve,reject)=>{
@@ -164,6 +218,7 @@ const getLeads = clientId =>{
    
 }
 
+//get Leads by id
 const getLeadsById = (_id,clientId) =>{
 
     return new Promise((resolve,reject)=>{
@@ -187,6 +242,7 @@ const getLeadsById = (_id,clientId) =>{
    
 }
 
+//update Leads
 const updateClientReply = ({_id,message,sender}) =>{
 
     return new Promise((resolve,reject)=>{
@@ -223,6 +279,7 @@ const updateClientReply = ({_id,message,sender}) =>{
    
 }
 
+//update close Leads
 const  updateStatusClose = ({_id,clientId}) =>{
 
     return new Promise((resolve,reject)=>{
@@ -251,6 +308,7 @@ const  updateStatusClose = ({_id,clientId}) =>{
    
 }
 
+//delete Lead
 const  deleteLead = ({_id,clientId}) =>{
 
     return new Promise((resolve,reject)=>{
@@ -277,6 +335,8 @@ const  deleteLead = ({_id,clientId}) =>{
    
 }
 
+
+//exports 
 module.exports={
     insertLeads,
     getLeads,
@@ -288,5 +348,10 @@ module.exports={
     generateLeadsReport,
     insertStaff,
     insertCust,
-    insertCat
+    insertCat,
+    getStaff,
+    generateStaffId,
+    getCust,
+    generateLeadId,
+    generateLeadMId
 }

@@ -2,8 +2,9 @@ const mongoose = require('mongoose');
 
 const LeadInfoSchema = new mongoose.Schema({
   leadInfoId:{
-    type: Number,
-    required: true
+    type: String,
+    required: true,
+    unique: true
   },
   companyName: {
     type: String,
