@@ -47,6 +47,7 @@ router.post('/login', async (req, res) => {
         res.json({ status: "Invalid", message: "invalid email or password" })
     }
     const user = await getUserByEmail(email)
+    console.log(user.Designation);
     const userDesignation = user.Designation;
     const passFromDb = user && user._id ? user.password : null
     if (!passFromDb) return res.json({ status: "Error", message: "invalid email or password" })

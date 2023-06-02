@@ -6,8 +6,10 @@ const helmet = require("helmet")
 const userRouter=require("./src/routers/user.router")
 const tokensRouter=require("./src/routers/tokens.router")
 const leadsRouter=require("./src/routers/leads.router")
+const adminRouter=require("./src/routers/admin.router")
 const handleError=require("./src/utils/errorHandler")
 const mongoose=require("mongoose")
+
 const dotenv=require('dotenv').config()
 const app=express()
 
@@ -48,6 +50,7 @@ mongoose.connect(process.env.MONGODB_URL, {
 app.use('/v1/user',userRouter)
 app.use('/v1/leads',leadsRouter)
 app.use('/v1/tokens',tokensRouter)
+app.use('/v1/admin',adminRouter)
 
 app.use((req,res,next)=>{
     const error=new Error("resource not found")
@@ -63,3 +66,5 @@ handleError(error,res)
 // customCron.sendMailAllUser();
 
 app.listen(PORT,()=>{console.log(`app is listening on port ${PORT}`)})
+
+
