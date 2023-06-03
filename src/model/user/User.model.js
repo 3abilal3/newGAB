@@ -1,5 +1,6 @@
 
 const { UserSchema } = require("./User.schema")
+const jwt = require('jsonwebtoken');
 
 const insertUser = userObj => {
     return new Promise((resolve, reject) => {
@@ -108,5 +109,19 @@ const updatePassword = (email, newHashPass) => {
         }
     })
 }
+
+
+// Function to decode the JWT and extract information
+// const decodeJWT = (token) => {
+//   try {
+//     const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET); // Assuming you have a JWT secret stored in the environment variable JWT_SECRET
+//     return decoded;
+//   } catch (error) {
+//     console.error('Error occurred while decoding JWT:', error);
+//     throw new Error('Failed to decode JWT');
+//   }
+// };
+
+
 
 module.exports = { insertUser, getUserById, getUserByEmail, storeUserRefreshJWT, updatePassword }

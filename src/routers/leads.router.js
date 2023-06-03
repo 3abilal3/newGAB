@@ -21,11 +21,10 @@ const {
   generateStaffId,
   getCust,
   generateLeadId,
-  generateLeadMId
+  generateLeadMId,
+  getUserById
 } = require("../model/leads/leads.model");
-
 const { getStaff }=require("../model/leads/leads.model");
-
 const { LeadsSchema } = require("../model/leads/leads.schema");
 const LeadCategorySchema  = require("../model/leads/category.Schema");
 const mongoose = require("mongoose");
@@ -38,10 +37,9 @@ const multer = require("multer");
 const path = require("path");
 const leadinfoSchema = require("../model/leads/leadinfo.Schema");
 const LeadManager = require("../model/leads/LeadManger");
-
 const { UserSchema } = require("../model/user/User.schema");
 const customerSchema = require("../model/leads/customer.Schema");
-
+// const { decodeJWT } = require("../model/user/User.model");
 const router = express.Router();
 
 //for attaching file
@@ -71,9 +69,52 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+
+
+
+// Middleware function to check user authorization
+// const userAuthorization2 = async (req, res, next) => {
+//   try {
+//     const token = req.headers.authorization.split(' ')[1]; // Assuming the token is provided in the 'Authorization' header
+//     const decodedToken = await decodeJWT(token);
+//     const userId = decodedToken.userId;
+
+//     // Fetch the user from the database using the userId
+//     const user = await getUserById(userId);
+//     if (!user) {
+//       return res.status(403).json({ error: 'Access denied' });
+//     }
+
+//     const userDesignation = user.Designation;
+
+//     // Check the user designation and authorize access to the corresponding APIs
+//     if (userDesignation === 'Manager') {
+//       // Allow access to all APIs
+//       req.userDesignation = userDesignation; // Set the user designation in the request object for further use
+//       next();
+//     } else if (userDesignation === 'Leads Manager') {
+//       // Allow access to "status-based-filter" and "followup" APIs
+//       const { originalUrl } = req;
+//       if (originalUrl === '/status-based-filter' || originalUrl === '/followup') {
+//         req.userDesignation = userDesignation; // Set the user designation in the request object for further use
+//         next();
+//       } else {
+//         return res.status(403).json({ error: 'Access denied' });
+//       }
+//     } else {
+//       // Invalid user designation
+//       return res.status(403).json({ error: 'Access denied' });
+//     }
+//   } catch (error) {
+//     console.error('Error occurred during user authorization:', error);
+//     res.status(500).json({ error: 'Internal Server Error' });
+//   }
+// };
+
+
 //create company endpoint
 
-router.post("/", userAuthorization, async (req, res) => {
+router.post("/",userAuthorization, async (req, res) => {
   try {
     //receive new ticket data
     const {
@@ -856,7 +897,7 @@ router.get("/followup", async (req, res) => {
 
 
 // Update lead status
-router.put("/:leadId/followup", async (req, res) => {
+router.put("/followup/:leadId", async (req, res) => {
   const { leadId } = req.params;
   const { status } = req.body;
 
@@ -903,7 +944,7 @@ router.put("/:leadId/followup", async (req, res) => {
 
 
 //get follow up
-router.get("/:leadId/followup", async (req, res) => {
+router.get("/followup/:leadId", async (req, res) => {
   const { leadId } = req.params;
 
   try {
@@ -931,7 +972,7 @@ router.get("/:leadId/followup", async (req, res) => {
 
 
 //view only follow up
-router.get("/:leadId/followup", async (req, res) => {
+router.get("/followup/:leadId", async (req, res) => {
   const { leadId } = req.params;
 
   try {

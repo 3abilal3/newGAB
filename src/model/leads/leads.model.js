@@ -3,6 +3,21 @@ const customerSchema = require("./customer.Schema");
 const LeadCategorySchema = require("./category.Schema");
 const { LeadsSchema } = require("./leads.schema");
 
+// Assuming you have a database connection and a User model defined
+
+// Function to get a user by ID from the database
+const getUserById = async (userId) => {
+    try {
+      const user = await UserSchema.findById(userId);
+      return user;
+    } catch (error) {
+      console.error('Error occurred while fetching user by ID:', error);
+      throw new Error('Failed to fetch user by ID');
+    }
+  };
+  
+ 
+  
 
 
 //inset staff
@@ -353,5 +368,6 @@ module.exports={
     generateStaffId,
     getCust,
     generateLeadId,
-    generateLeadMId
+    generateLeadMId,
+    
 }

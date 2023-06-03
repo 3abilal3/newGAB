@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const AdminUserSchema = new mongoose.Schema({
-  fullName: {
+  username: {
     type: String,
   
     unique: true
@@ -14,13 +14,13 @@ const AdminUserSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-   
+    required: true
   },
   contactNumber: {
     type: String,
     
   },
-  userLevel: {
+  role: {
     type: String,
     enum: ['Admin', 'Manager', 'Lead Manager'],
    
