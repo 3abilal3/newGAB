@@ -170,7 +170,7 @@ router.post('/companies', authenticateUser, async (req, res) => {
 router.post('/registration', authenticateUser, async (req, res) => {
   try {
     // ... existing code ...
-    const { fullName, email,password, contactNumber, userLevel,companyId } = req.body;
+    const { fullName, email,password, contactNumber, userLevel,companyId, userID } = req.body;
   
           // Find the company and check the number of users allowed
           const company = await companySchema.findOne({companyId}); // Replace 'Your Company Name' with the actual company name
@@ -189,14 +189,13 @@ router.post('/registration', authenticateUser, async (req, res) => {
             return res.status(400).json({ error: 'Maximum number of users exceeded' });
           }
       
- 
-      
     // Create a new user
     const user = {
       fullName,
       email,
       contactNumber,
       userLevel,
+      userID,
       password
     };
 

@@ -26,15 +26,15 @@ const {
   getStaffByDepartment,
   searchCust
 } = require("../model/leads/leads.model");
-const { getStaff }=require("../model/leads/leads.model");
+const { getStaff } = require("../model/leads/leads.model");
 const { LeadsSchema } = require("../model/leads/leads.schema");
-const LeadCategorySchema  = require("../model/leads/category.Schema");
+const LeadCategorySchema = require("../model/leads/category.Schema");
 const mongoose = require("mongoose");
 const {
   isAdmin,
   isLeadManager,
 } = require("../middlewares/userRights.middleware");
-const StaffSchema  = require("../model/leads/Staff.schema");
+const StaffSchema = require("../model/leads/Staff.schema");
 const multer = require("multer");
 const path = require("path");
 const leadinfoSchema = require("../model/leads/leadinfo.Schema");
@@ -42,6 +42,7 @@ const LeadManager = require("../model/leads/LeadManger");
 const { UserSchema } = require("../model/user/User.schema");
 const customerSchema = require("../model/leads/customer.Schema");
 const workingRightsMiddleware = require("../middlewares/userRights.middleware");
+const companySchema = require("../model/admin/company.schema");
 // const { decodeJWT } = require("../model/user/User.model");
 const router = express.Router();
 
@@ -117,7 +118,7 @@ const transporter = nodemailer.createTransport({
 
 //create company endpoint
 
-router.post("/",userAuthorization, async (req, res) => {
+router.post("/", userAuthorization, async (req, res) => {
   try {
     //receive new ticket data
     const {
@@ -180,11 +181,11 @@ router.post("/",userAuthorization, async (req, res) => {
 //post-> get -> edit -> create -> delete
 
 // POST route to save staff  infodata
-router.post('/staff-info',userAuthorization, async (req, res) => {
+router.post('/staff-info', userAuthorization, async (req, res) => {
   try {
-    const {  staffName, mobileNo, email, designation, department } = req.body;
-// Generate a unique staff ID
-const staffId = generateStaffId();
+    const { staffName, mobileNo, email, designation, department } = req.body;
+    // Generate a unique staff ID
+    const staffId = generateStaffId();
     // Create a new staff object
     const staffObj = ({
       staffId,
@@ -279,7 +280,7 @@ router.delete('/staff-info/:staffId', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
- 
+
 //filter based on department
 // API endpoint for department-based filtering
 
@@ -624,7 +625,7 @@ router.post("/leads-Info", upload.single("attachment"), async (req, res) => {
     otherDetails,
     followUpDate,
     followUpTime,
-    
+
   } = req.body;
 
   const validStatusOptions = [
@@ -650,7 +651,7 @@ router.post("/leads-Info", upload.single("attachment"), async (req, res) => {
       otherDetails,
       followUpDate,
       followUpTime,
-      leadInfoId:leadInfoId,
+      leadInfoId: leadInfoId,
       attachment: req.file ? req.file.path : "",
     });
 
@@ -699,7 +700,7 @@ router.put("/leads-Info/:leadInfoId", upload.single("attachment"), async (req, r
 
   try {
     // Find the lead information document based on the leadInfoId
-    
+
     const leadInfo = await leadinfoSchema.findById(leadInfoId);
 
     if (!leadInfo) {
@@ -791,63 +792,71 @@ router.delete("/leads-Info/:leadInfoId", async (req, res) => {
 
 //lead-assign 
 // API route to add LeadInfo to LeadManager
+
+// router.post('/assign-lead', async (req, res) => {
+//   try {
+//     const { leadInfoIds, userId } = req.body;
+//     // Step 1: Get data of LeadInfo based on LeadInfoID
+//     const leadInfos = await leadinfoSchema.find({ leadInfoId:  leadInfoIds });
+    
+//     if (!leadInfos || leadInfos.length === 0) {
+//       return res.status(404).json({ message: 'LeadInfos not found' });
+//     }
+//     // Step 2: Find the user based on the userId
+//     const company = await companySchema.findOne({ 'users.userId': userId });
+//     if (!company) {
+//       return res.status(404).json({ message: 'Company not found' });
+//     }
+//     // Step 3: Find the user within the company's users array
+//     const user = company.users.find((user) => user.userId === userId);
+//     if (!user) {
+//       return res.status(404).json({ message: 'User not found' });
+//     }
+//     // Step 4: Push the leadInfos into the user's leadInfo array
+//     user.leadInfo.push(...leadInfos);
+//     await company.save();
+//     res.status(200).json({ message: 'Leads assigned to user successfully' });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: 'Internal server error' });
+//   }
+// });
 router.post('/assign-lead', async (req, res) => {
   try {
-    const { leadInfoIds , leadManagerId} = req.body;
-
+    const { leadInfoIds,userId,companyID } = req.body;
     
     // Step 1: Get data of LeadInfo based on LeadInfoID
-    const leadInfos = await leadinfoSchema.find({ leadInfoId:{ $in: leadInfoIds} });
+    const leadInfos = await leadinfoSchema.find({ leadInfoId: { $in: leadInfoIds } });
     
-
-    if (leadInfos) {
-      res.status(200).json({ message: 'LeadInfos assigned to LeadManager successfully' });
-    }
-
-    if (!leadInfos) {
+    if (!leadInfos || leadInfos.length === 0) {
       return res.status(404).json({ message: 'LeadInfos not found' });
     }
-
-    // Step 2: Search LeadManager based on LeadManagerID
-    const leadManager = await leadManger.findOne({ leadManagerId: leadManagerId });
-
-    if (!leadManager) {
-      return res.status(404).json({ message: 'LeadManager not found' });
+    const company = await companySchema.findOne({ companyId: companyID });
+    if (!company) {
+      return res.status(404).json({ message: 'Company not found' });
     }
+    const user = company.users.find((user) => user.userID === userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found in the Company' });
+    }
+    
+    user.leadInfo.push(...leadInfos);
+    await company.save();
 
-    // Step 3: Push LeadInfo into leadInfo array in LeadManager Schema
-  //   leadManager.leadInfo.push(leadInfo);
-  //   await leadManager.save();
-
-  //   res.status(200).json({ message: 'LeadInfo added to LeadManager successfully' });
-  // } 
-  // catch (error) {
-  //   console.error(error);
-  //   res.status(500).json({ message: 'Internal server error' });
-
-  const missingLeadInfos = leadInfoIds.filter((leadInfoId) => !leadInfos.some((leadInfo) => leadInfo.leadInfoId === leadInfoId));
-  if (missingLeadInfos.length > 0) {
-    return res.status(404).json({ message: `LeadInfo with IDs ${missingLeadInfos.join(', ')} not found` });
-  }
-
-  // Step 4: Assign LeadInfo to LeadManager
-  leadManager.leadInfo.push(...leadInfos);
-  await leadManager.save();
-
-  res.status(200).json({ message: 'Leads assigned to LeadManager successfully' });
-} catch (error) {
-  console.error(error);
-  res.status(500).json({ message: 'Internal server error' });
+    res.status(200).json({ message: 'LeadInfos assigned to the user successfully' });
+    // res.status(200).json(leadInfos);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 });
-
 
 
 
 // Add Lead Manager 
 router.post('/addLeadManager', async (req, res) => {
   try {
-    const leadMId=generateLeadMId();
+    const leadMId = generateLeadMId();
     const {
       leadManagerId,
       leadManagerName,
@@ -855,7 +864,7 @@ router.post('/addLeadManager', async (req, res) => {
 
     // Create a new LeadManager object
     const newLeadManager = new LeadManager({
-      leadManagerId:leadMId,
+      leadManagerId: leadMId,
       leadManagerName,
     });
 
@@ -1123,28 +1132,28 @@ router.get("/:_id", userAuthorization, async (req, res) => {
 
 
 //update the lead status after client reply
-router.put("/:_id",replyLeadMessageValidation,userAuthorization,async (req, res) => {
-    try {
-      const { message, sender } = req.body;
-      const clientId = req.userId;
-      const { _id } = req.params;
-      const result = await updateClientReply({ _id, message, sender });
-      console.log(result);
-      //insert in mongodb
-      if (result._id) {
-        return res.json({
-          status: "success",
-          message: "your message have been updated",
-        });
-      }
+router.put("/:_id", replyLeadMessageValidation, userAuthorization, async (req, res) => {
+  try {
+    const { message, sender } = req.body;
+    const clientId = req.userId;
+    const { _id } = req.params;
+    const result = await updateClientReply({ _id, message, sender });
+    console.log(result);
+    //insert in mongodb
+    if (result._id) {
       return res.json({
         status: "success",
-        message: "Unable to update your message please try again later ",
+        message: "your message have been updated",
       });
-    } catch (error) {
-      res.json({ status: "error", message: error.message });
     }
+    return res.json({
+      status: "success",
+      message: "Unable to update your message please try again later ",
+    });
+  } catch (error) {
+    res.json({ status: "error", message: error.message });
   }
+}
 );
 
 
