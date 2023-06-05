@@ -22,7 +22,9 @@ const {
   getCust,
   generateLeadId,
   generateLeadMId,
-  getUserById
+  getUserById,
+  getStaffByDepartment,
+  searchCust
 } = require("../model/leads/leads.model");
 const { getStaff }=require("../model/leads/leads.model");
 const { LeadsSchema } = require("../model/leads/leads.schema");
@@ -39,6 +41,7 @@ const leadinfoSchema = require("../model/leads/leadinfo.Schema");
 const LeadManager = require("../model/leads/LeadManger");
 const { UserSchema } = require("../model/user/User.schema");
 const customerSchema = require("../model/leads/customer.Schema");
+const workingRightsMiddleware = require("../middlewares/userRights.middleware");
 // const { decodeJWT } = require("../model/user/User.model");
 const router = express.Router();
 
@@ -177,7 +180,7 @@ router.post("/",userAuthorization, async (req, res) => {
 //post-> get -> edit -> create -> delete
 
 // POST route to save staff  infodata
-router.post('/staff-info', async (req, res) => {
+router.post('/staff-info',userAuthorization, async (req, res) => {
   try {
     const {  staffName, mobileNo, email, designation, department } = req.body;
 // Generate a unique staff ID
@@ -276,6 +279,10 @@ router.delete('/staff-info/:staffId', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+ 
+//filter based on department
+// API endpoint for department-based filtering
+
 
 
 
@@ -462,6 +469,9 @@ router.delete("/CustomerInfo/:customerId", async (req, res) => {
     res.status(500).json({ error: "Error deleting customer" });
   }
 });
+
+
+
 
 
 
