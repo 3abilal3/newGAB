@@ -32,8 +32,7 @@ const LeadCategorySchema = require("../model/leads/category.Schema");
 const mongoose = require("mongoose");
 const {
   isAdmin,
-  isLeadManager,
-} = require("../middlewares/userRights.middleware");
+  isLeadManager} = require("../middlewares/userRights.middleware");
 const StaffSchema = require("../model/leads/Staff.schema");
 const multer = require("multer");
 const path = require("path");
@@ -76,44 +75,7 @@ const transporter = nodemailer.createTransport({
 
 
 
-// Middleware function to check user authorization
-// const userAuthorization2 = async (req, res, next) => {
-//   try {
-//     const token = req.headers.authorization.split(' ')[1]; // Assuming the token is provided in the 'Authorization' header
-//     const decodedToken = await decodeJWT(token);
-//     const userId = decodedToken.userId;
 
-//     // Fetch the user from the database using the userId
-//     const user = await getUserById(userId);
-//     if (!user) {
-//       return res.status(403).json({ error: 'Access denied' });
-//     }
-
-//     const userDesignation = user.Designation;
-
-//     // Check the user designation and authorize access to the corresponding APIs
-//     if (userDesignation === 'Manager') {
-//       // Allow access to all APIs
-//       req.userDesignation = userDesignation; // Set the user designation in the request object for further use
-//       next();
-//     } else if (userDesignation === 'Leads Manager') {
-//       // Allow access to "status-based-filter" and "followup" APIs
-//       const { originalUrl } = req;
-//       if (originalUrl === '/status-based-filter' || originalUrl === '/followup') {
-//         req.userDesignation = userDesignation; // Set the user designation in the request object for further use
-//         next();
-//       } else {
-//         return res.status(403).json({ error: 'Access denied' });
-//       }
-//     } else {
-//       // Invalid user designation
-//       return res.status(403).json({ error: 'Access denied' });
-//     }
-//   } catch (error) {
-//     console.error('Error occurred during user authorization:', error);
-//     res.status(500).json({ error: 'Internal Server Error' });
-//   }
-// };
 
 
 //create company endpoint
@@ -284,6 +246,36 @@ router.delete('/staff-info/:staffId', async (req, res) => {
 //filter based on department
 // API endpoint for department-based filtering
 
+// export const searchStaff = async (req, res) => {
+//   const id = req.params.id;
+//   console.log(id);
+//   let data = await Product.find({  $or: [{ names: { $regexs :id } }]
+  
+// })
+//   res.status(200).json({date});
+//   };
+
+  // Search staff by department, designation, and staff name
+  // router.post('/search-staff', async (req, res) => {
+  //   try {
+  //     const { staffName } = req.body;
+  
+  //     // Create a query object to search for staff
+  //     const query = {};
+  
+  //     const regexStaffName = new RegExp(staffName, 'i');
+  //     query.staffName = regexStaffName;
+  
+  //     // Find staff based on the query
+  //     const staff = await StaffSchema.find(query);
+  
+  //     res.status(200).json({ staff: staff }); // Return only the matching staff records
+  //   } catch (error) {
+  //     console.error('Error occurred while searching staff:', error);
+  //     res.status(500).json({ error: 'Internal Server Error' });
+  //   }
+  // });
+  
 
 
 
@@ -471,6 +463,24 @@ router.delete("/CustomerInfo/:customerId", async (req, res) => {
   }
 });
 
+// Get all users of a specific company
+router.get('/companies/:companyId/users', async (req, res) => {
+  try {
+    const { companyId } = req.params;
+
+    // Find the company by ID
+    const company = await companySchema.findOne({ companyId });
+    if (!company) {
+      return res.status(404).json({ error: 'Company not found' });
+    }
+
+    // Return the users data of the company
+    res.status(200).json({ users: company.users });
+  } catch (error) {
+    console.error('Error occurred while retrieving users:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 
 
@@ -786,41 +796,6 @@ router.delete("/leads-Info/:leadInfoId", async (req, res) => {
 });
 
 
-
-
-
-
-//lead-assign 
-// API route to add LeadInfo to LeadManager
-
-// router.post('/assign-lead', async (req, res) => {
-//   try {
-//     const { leadInfoIds, userId } = req.body;
-//     // Step 1: Get data of LeadInfo based on LeadInfoID
-//     const leadInfos = await leadinfoSchema.find({ leadInfoId:  leadInfoIds });
-    
-//     if (!leadInfos || leadInfos.length === 0) {
-//       return res.status(404).json({ message: 'LeadInfos not found' });
-//     }
-//     // Step 2: Find the user based on the userId
-//     const company = await companySchema.findOne({ 'users.userId': userId });
-//     if (!company) {
-//       return res.status(404).json({ message: 'Company not found' });
-//     }
-//     // Step 3: Find the user within the company's users array
-//     const user = company.users.find((user) => user.userId === userId);
-//     if (!user) {
-//       return res.status(404).json({ message: 'User not found' });
-//     }
-//     // Step 4: Push the leadInfos into the user's leadInfo array
-//     user.leadInfo.push(...leadInfos);
-//     await company.save();
-//     res.status(200).json({ message: 'Leads assigned to user successfully' });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: 'Internal server error' });
-//   }
-// });
 router.post('/assign-lead', async (req, res) => {
   try {
     const { leadInfoIds,userId,companyID } = req.body;

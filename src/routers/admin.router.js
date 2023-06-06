@@ -159,7 +159,7 @@ router.post('/companies', authenticateUser, async (req, res) => {
     // Save the company profile to the database
     await company.save();
 
-    res.status(201).json({ message: 'Company profile created successfully' });
+      res.status(201).json({ message: 'Company profile created successfully' ,companyId});
   } catch (error) {
     console.error('Error occurred while setting up company profile:', error);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -293,7 +293,6 @@ router.post('/loginC', authenticateUser, async (req, res) => {
   }
 });
 
-// Logout
 // Logout
 router.post('/logoutC', authenticateUser, async (req, res) => {
     try {
